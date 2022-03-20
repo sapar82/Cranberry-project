@@ -1,10 +1,71 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
-from load_data import df_background, df_non_scarifie, df_scarifie
+
+def plot_array(array):
+
+    fig, ax = plt.subplots()
+
+    for sample in array:
+        ax.plot(np.arange(array.shape[1]), sample)
+    
+    plt.show()
 
 
-df_background.plot(x="wavelength")
-df_non_scarifie.plot(x="wavelength")
-df_scarifie.plot(x="wavelength")
+if __name__ == '__main__':
 
-plt.show()
+    fig_data = np.load("data/figures/fig_data.npy")
+    table_data = np.load("data/figures/table_data.npy")
+
+    print(table_data)
+
+    # scarified fraction figure
+    fig, ax = plt.subplots()
+
+    ax.set_xlabel('n_scarified out of 10 [-]')
+    ax.set_ylabel('weight_scarified [-]')
+
+    for w, beta in zip(fig_data, (0, 0.1, 1, 10)):
+        ax.plot(np.arange(11), w, label=r'$\beta$ = '+str(beta))
+    ax.tick_params(direction='in')
+
+    plt.legend()
+    plt.show()
+
+    # metrics figures
+    fig, ax1 = plt.subplots()
+
+    betas = [0.01, 0.05, 0.1, 0.5, 1, 5, 10]
+
+    color = 'tab:blue'
+    ax1.set_xlabel(r'$\beta$ [-]')
+    ax1.set_ylabel('reconstruction_error [-]', color=color)
+    ax1.plot(betas, table_data[:,1], color=color)
+    ax1.tick_params(axis='y', labelcolor=color, direction='in')
+
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+    color = 'tab:red'
+    ax2.set_ylabel('divergence_error [-]', color=color)  # we already handled the x-label with ax1
+    ax2.plot(betas, table_data[:,2], color=color)
+    ax2.tick_params(axis='y', labelcolor=color, direction='in')
+
+    ax1.set_xscale('log')
+    ax1.set_xticks([0.01, 0.1, 1, 10])
+    ax1.set_xticklabels([0, 0.1, 1, 10])
+
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    plt.show()
+
+    fig, ax = plt.subplots()
+
+    ax.set_xlabel(r'$\beta$ [-]')
+    ax.set_ylabel('sum_errors [-]')
+    ax.plot(betas, table_data[:,1]/max(table_data[:,1]) + table_data[:,2]/max(table_data[:,2]), color='k')
+    ax.tick_params(direction='in')
+
+    ax.set_xscale('log')
+    ax.set_xticks([0.01, 0.1, 1, 10])
+    ax.set_xticklabels([0, 0.1, 1, 10])
+
+    plt.show()
